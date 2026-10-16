@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F8F3E6">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>말씀 십자가</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: one-column mobile app shell — header / scrolling screen / optional action bar / bottom nav. Single ivory theme by choice. */
+:root{
+  --ivory:#F8F3E6;
+  --paper:#FFFCF4;
+  --ink:#3B3327;
+  --muted:#857A69;
+  --line:#E6DECB;
+  --empty:#E3E0D8;
+  --gold:#B88A2F;
+  --gold-hi:#E8C877;
+  --gold-deep:#8A651D;
+  --gold-wash:#F4E8C9;
+  --danger:#9A4B3A;
+  --font-display:"Gowun Batang","Nanum Myeongjo","Noto Serif KR",serif;
+  --font-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{height:100%;box-sizing:border-box;background:var(--ivory)}
+body{height:100%;margin:0;background:var(--ivory);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+.app{position:relative;height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden}
+main{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.screen{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));padding-block:20px 28px}
+
+/* ---------- Home ---------- */
+.home{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+.brand{display:flex;flex-direction:column;align-items:center;gap:2px}
+.brand h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:.08em}
+.brand p{margin:0;font-size:12.5px;color:var(--muted);letter-spacing:.04em}
+
+.cross-wrap{position:relative;display:flex;justify-content:center;align-items:center;padding:6px 0}
+.halo{position:absolute;inset:-6% -30%;background:radial-gradient(closest-side,rgba(232,200,119,.55),rgba(232,200,119,.18) 55%,rgba(232,200,119,0) 75%);opacity:0;transition:opacity 1.6s ease;pointer-events:none}
+.cross-wrap.complete .halo{opacity:1;animation:breathe 5s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.04);opacity:.8}}
+.cross{position:relative;display:block;height:min(46dvh,400px,calc(70vw * 18 / 13));aspect-ratio:13/18;max-width:100%;overflow:visible}
+.cross .base{fill:var(--empty)}
+.cross .fill{fill:url(#goldGrad);transition:opacity .9s ease}
+.cross .outline{fill:none;stroke:var(--gold);stroke-opacity:.5;stroke-width:1.3;stroke-linejoin:round}
+.cross-wrap.complete .outline{stroke-opacity:.9}
+.spark{fill:var(--gold-hi);filter:url(#soft);transform-box:fill-box;transform-origin:center;animation:spark 1.5s ease-out both;pointer-events:none}
+@keyframes spark{0%{opacity:0;transform:scale(.6)}30%{opacity:.95;transform:scale(1.6)}100%{opacity:0;transform:scale(2)}}
+
+.cross3d{position:relative;height:min(44dvh,400px,calc(74vw * 19 / 15));aspect-ratio:15/19;max-width:100%}
+.cross3d canvas{display:block;width:100%;height:100%;touch-action:pan-y;cursor:grab}
+.cross3d canvas:active{cursor:grabbing}
+.view-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:-10px}
+.hint{font-size:12px;color:var(--muted);letter-spacing:.02em}
+.stats{display:flex;flex-direction:column;align-items:center;gap:2px}
+.pct{font-family:var(--font-display);font-size:40px;font-weight:700;line-height:1.1;color:var(--gold-deep);font-variant-numeric:tabular-nums}
+.pct small{font-size:20px;margin-left:2px}
+.count{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.count b{color:var(--ink);font-weight:500}
+.done-note{font-family:var(--font-display);font-size:15px;color:var(--gold-deep);margin-top:4px}
+.today-note{font-size:13px;color:var(--muted)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:14px 22px;font-weight:500;font-size:15px;transition:transform .15s ease,background .2s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--gold);color:var(--paper);box-shadow:0 6px 18px -8px rgba(138,101,29,.6)}
+.btn-primary:hover{background:var(--gold-deep)}
+.btn-ghost{background:transparent;color:var(--gold-deep);border:1px solid var(--gold)}
+.btn-wide{width:100%;max-width:340px}
+
+/* ---------- Shared headers ---------- */
+.head{display:flex;flex-direction:column;gap:2px;margin-bottom:16px}
+.head h2{margin:0;font-family:var(--font-display);font-size:22px;font-weight:700}
+.head p{margin:0;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.seg{display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:transparent;border-radius:999px;padding:8px 0;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--gold-wash);color:var(--gold-deep);font-weight:500}
+
+/* ---------- Check ---------- */
+.books{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.book{border-bottom:1px solid var(--line)}
+.book-head{width:100%;display:grid;grid-template-columns:1fr auto 16px;align-items:center;gap:12px;padding:13px 2px;border:0;background:transparent;text-align:left}
+.book-name{display:flex;flex-direction:column;gap:6px;min-width:0}
+.book-name span{font-size:15.5px;font-weight:500}
+.bar{height:3px;border-radius:2px;background:var(--empty);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:2px;transition:width .5s ease}
+.book-count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.book.full .book-count{color:var(--gold-deep);font-weight:500}
+.chev{width:16px;height:16px;transition:transform .2s;color:var(--muted)}
+.book-head[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.panel{padding:2px 0 16px}
+.panel-tools{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-size:12.5px;color:var(--muted)}
+.chip:hover{border-color:var(--gold);color:var(--gold-deep)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+.ch{position:relative;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.ch.read{background:var(--gold-wash);border-color:transparent;color:var(--gold-deep);font-weight:500}
+.ch.read::after{content:"";position:absolute;top:5px;right:5px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.ch.sel{border:2px solid var(--gold);background:var(--paper);color:var(--gold-deep);font-weight:700}
+.ch.read.sel{border:2px dashed var(--danger);background:var(--paper);color:var(--danger);text-decoration:line-through}
+.ch.read.sel::after{background:var(--danger)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:2px 0 12px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:4px;border:1px solid var(--line);background:var(--paper)}
+.legend i.r{background:var(--gold-wash);border-color:transparent}
+.legend i.s{border:2px solid var(--gold)}
+
+/* ---------- Action bar ---------- */
+.actionbar{background:var(--paper);border-top:1px solid var(--line);box-shadow:0 -8px 20px -14px rgba(59,51,39,.35);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px;display:flex;flex-direction:column;gap:10px}
+.ab-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ab-sum{flex:1;min-width:0;font-size:13px;color:var(--muted)}
+.ab-sum b{color:var(--ink);font-weight:500}
+.ab-date{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.ab-date input{border:1px solid var(--line);border-radius:8px;background:var(--ivory);padding:4px 8px;font-size:13px;min-width:0}
+.ab-btns{display:flex;gap:8px}
+.ab-btns .btn{flex:1;padding:12px 10px;font-size:14px}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+.ab-clear{border:0;background:transparent;color:var(--muted);font-size:13px;padding:4px 2px;text-decoration:underline}
+
+/* ---------- Records ---------- */
+.summary{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:14px;margin-bottom:24px}
+.sum-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.label{font-size:12px;color:var(--muted);letter-spacing:.06em}
+.sum-val{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+.sum-row input[type=date]{border:1px solid var(--line);border-radius:8px;background:var(--ivory);padding:5px 8px;font-size:14px}
+.ranges{display:flex;gap:6px;flex-wrap:wrap}
+.ranges button{border:1px solid var(--line);background:var(--ivory);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted)}
+.ranges button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--paper)}
+.bigbar{height:8px;border-radius:4px;background:var(--empty);overflow:hidden}
+.bigbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-deep),var(--gold-hi));border-radius:4px}
+.complete-line{font-family:var(--font-display);color:var(--gold-deep);font-size:14px}
+
+.sec-title{font-family:var(--font-display);font-size:17px;font-weight:700;margin:0 0 10px}
+.days{display:flex;flex-direction:column}
+.day{display:grid;grid-template-columns:62px 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.day-date{display:flex;flex-direction:column;line-height:1.25}
+.day-date b{font-family:var(--font-display);font-size:18px;font-variant-numeric:tabular-nums}
+.day-date span{font-size:12px;color:var(--muted)}
+.day-body{min-width:0;display:flex;flex-direction:column;gap:3px}
+.day-body .n{font-size:12px;color:var(--gold-deep);font-weight:500}
+.day-body p{margin:0;font-size:14.5px;overflow-wrap:anywhere}
+.empty{padding:28px 8px;text-align:center;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+.reset{margin-top:28px;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:13px;color:var(--muted);text-align:center}
+.reset .row{display:flex;gap:8px}
+.linkbtn{border:0;background:transparent;color:var(--muted);text-decoration:underline;font-size:13px;padding:6px}
+
+/* ---------- Nav ---------- */
+nav{display:grid;grid-template-columns:repeat(3,1fr);background:var(--paper);border-top:1px solid var(--line);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));padding-block:6px 4px}
+nav button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11.5px;color:var(--muted)}
+nav svg{width:22px;height:22px}
+nav button[aria-current="page"]{color:var(--gold-deep);font-weight:500}
+
+/* ---------- Toast ---------- */
+.toast{position:absolute;left:50%;bottom:84px;transform:translate(-50%,10px);width:max-content;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);font-size:13.5px;padding:10px 16px;border-radius:12px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){
+  .cross .fill,.bar i,.halo{transition:none}
+  .spark{display:none}
+  .cross-wrap.complete .halo{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <main id="main"></main>
+  <div class="actionbar" id="actionbar" hidden></div>
+  <nav aria-label="메뉴">
+    <button type="button" data-go="home" id="nav-home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 3h4v5h5v4h-5v9h-4v-9H5V8h5z"/></svg>홈
+    </button>
+    <button type="button" data-go="check" id="nav-check">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>읽기 체크
+    </button>
+    <button type="button" data-go="records" id="nav-records">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h11a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6"/></svg>나의 기록
+    </button>
+  </nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===================== 데이터: 책별 장 수 (개역개정 기준) ===================== */
+const BOOKS = [
+  ["gen","창세기",50,"ot"],["exo","출애굽기",40,"ot"],["lev","레위기",27,"ot"],["num","민수기",36,"ot"],["deu","신명기",34,"ot"],
+  ["jos","여호수아",24,"ot"],["jdg","사사기",21,"ot"],["rut","룻기",4,"ot"],["1sa","사무엘상",31,"ot"],["2sa","사무엘하",24,"ot"],
+  ["1ki","열왕기상",22,"ot"],["2ki","열왕기하",25,"ot"],["1ch","역대상",29,"ot"],["2ch","역대하",36,"ot"],["ezr","에스라",10,"ot"],
+  ["neh","느헤미야",13,"ot"],["est","에스더",10,"ot"],["job","욥기",42,"ot"],["psa","시편",150,"ot"],["pro","잠언",31,"ot"],
+  ["ecc","전도서",12,"ot"],["sng","아가",8,"ot"],["isa","이사야",66,"ot"],["jer","예레미야",52,"ot"],["lam","예레미야애가",5,"ot"],
+  ["ezk","에스겔",48,"ot"],["dan","다니엘",12,"ot"],["hos","호세아",14,"ot"],["jol","요엘",3,"ot"],["amo","아모스",9,"ot"],
+  ["oba","오바댜",1,"ot"],["jon","요나",4,"ot"],["mic","미가",7,"ot"],["nam","나훔",3,"ot"],["hab","하박국",3,"ot"],
+  ["zep","스바냐",3,"ot"],["hag","학개",2,"ot"],["zec","스가랴",14,"ot"],["mal","말라기",4,"ot"],
+  ["mat","마태복음",28,"nt"],["mrk","마가복음",16,"nt"],["luk","누가복음",24,"nt"],["jhn","요한복음",21,"nt"],["act","사도행전",28,"nt"],
+  ["rom","로마서",16,"nt"],["1co","고린도전서",16,"nt"],["2co","고린도후서",13,"nt"],["gal","갈라디아서",6,"nt"],["eph","에베소서",6,"nt"],
+  ["php","빌립보서",4,"nt"],["col","골로새서",4,"nt"],["1th","데살로니가전서",5,"nt"],["2th","데살로니가후서",3,"nt"],["1ti","디모데전서",6,"nt"],
+  ["2ti","디모데후서",4,"nt"],["tit","디도서",3,"nt"],["phm","빌레몬서",1,"nt"],["heb","히브리서",13,"nt"],["jas","야고보서",5,"nt"],
+  ["1pe","베드로전서",5,"nt"],["2pe","베드로후서",3,"nt"],["1jn","요한일서",5,"nt"],["2jn","요한이서",1,"nt"],["3jn","요한삼서",1,"nt"],
+  ["jud","유다서",1,"nt"],["rev","요한계시록",22,"nt"]
+].map(([id,name,ch,t],i)=>({id,name,ch,t,order:i}));
+const BOOK = Object.fromEntries(BOOKS.map(b=>[b.id,b]));
+
+/* ===================== 데이터: 통독 범위 ===================== */
+const RANGES = [
+  {id:"all", name:"성경 전체", books:BOOKS.map(b=>b.id)},
+  {id:"ot", name:"구약", books:BOOKS.filter(b=>b.t==="ot").map(b=>b.id)},
+  {id:"nt", name:"신약", books:BOOKS.filter(b=>b.t==="nt").map(b=>b.id)},
+  {id:"gospels", name:"사복음서", books:["mat","mrk","luk","jhn"]}
+];
+const RANGE = Object.fromEntries(RANGES.map(r=>[r.id,r]));
+
+/* ===================== 저장소 ===================== */
+const KEY = "malsseum-cross:v1";
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+let storageOk = true;
+function load(){
+  const fresh = {rangeId:"all", startDate:null, reads:{}};
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return fresh;
+    const s = JSON.parse(raw);
+    const reads = {};
+    if(s && s.reads && typeof s.reads==="object"){
+      for(const [k,v] of Object.entries(s.reads)){
+        const [id,c] = k.split(":"); const n = +c;
+        if(BOOK[id] && Number.isInteger(n) && n>=1 && n<=BOOK[id].ch && DATE_RE.test(v)) reads[id+":"+n] = v;
+      }
+    }
+    return {
+      rangeId: RANGE[s.rangeId] ? s.rangeId : "all",
+      startDate: DATE_RE.test(s.startDate||"") ? s.startDate : null,
+      reads
+    };
+  }catch(e){ storageOk = false; return fresh; }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); storageOk = true; }
+  catch(e){ if(storageOk) toast("이 브라우저에서는 기록을 저장할 수 없어요. 사생활 보호 모드를 확인해 주세요."); storageOk = false; }
+}
+let state = load();
+
+/* ===================== 유틸 ===================== */
+const $ = s=>document.querySelector(s);
+const pad = n=>String(n).padStart(2,"0");
+function today(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+const WD = ["일","월","화","수","목","금","토"];
+function parts(s){ const [y,m,d]=s.split("-").map(Number); return {y,m,d,w:WD[new Date(y,m-1,d).getDay()]}; }
+function fmtFull(s){ const p=parts(s); return `${p.y}년 ${p.m}월 ${p.d}일`; }
+const key = (id,c)=>id+":"+c;
+const num = n=>n.toLocaleString("ko-KR");
+
+function rangeStats(){
+  const r = RANGE[state.rangeId];
+  let total=0, read=0, maxDate=null, todayN=0; const t=today();
+  for(const id of r.books){
+    const b=BOOK[id]; total+=b.ch;
+    for(let c=1;c<=b.ch;c++){
+      const d=state.reads[key(id,c)];
+      if(d){ read++; if(!maxDate||d>maxDate) maxDate=d; if(d===t) todayN++; }
+    }
+  }
+  return {total, read, p: total? read/total : 0, completedAt: total && read===total ? maxDate : null, todayN};
+}
+function pctText(p){ const v = Math.floor(p*1000)/10; return (p>=1?100:v).toFixed(p>=1?0:1); }
+function bookRead(id){ let n=0; for(let c=1;c<=BOOK[id].ch;c++) if(state.reads[key(id,c)]) n++; return n; }
+
+/* 장 목록 → "창세기 1–3, 5장" 같은 문구 */
+function describe(keys){
+  const by = {};
+  for(const k of keys){ const [id,c]=k.split(":"); (by[id]=by[id]||[]).push(+c); }
+  return Object.keys(by).sort((a,b)=>BOOK[a].order-BOOK[b].order).map(id=>{
+    const ns = by[id].sort((a,b)=>a-b); const out=[]; let s=ns[0], p=ns[0];
+    for(let i=1;i<=ns.length;i++){
+      const n=ns[i]; if(n===p+1){p=n;continue;}
+      out.push(s===p?`${s}`:`${s}–${p}`); s=p=n;
+    }
+    return `${BOOK[id].name} ${out.join(", ")}장`;
+  });
+}
+
+/* ===================== 십자가 형태: 한 장 = 한 블록 ===================== */
+// 통독 범위의 장 수와 정확히 같은 개수의 블록으로 십자가 비율을 찾는다.
+// p: 기둥 폭, q: 가로대 높이, L: 한쪽 팔 길이, H: 전체 높이 (모두 블록 단위)
+const layoutCache = {};
+function crossLayout(n){
+  if(layoutCache[n]) return layoutCache[n];
+  let best=null;
+  for(let p=1;p<=25;p++) for(let q=Math.max(1,p-2);q<=p+2;q++) for(let L=1;L<=90;L++){
+    const rest=n-2*L*q; if(rest<=0) break; if(rest%p) continue;
+    const H=rest/p; if(H<q+4) continue;
+    const W=p+2*L;
+    const score=Math.abs(H/W-1.4)*2+Math.abs(p/W-.24)*3+Math.abs(q-p)/p*1.5+(p<3?3:0);
+    if(!best||score<best.score) best={p,q,L,H,W,score};
+  }
+  if(!best) best={p:1,q:0,L:0,H:n,W:1};
+  const {p,q,L,H,W}=best;
+  const top=Math.round((H-q)*.27), armBot=top+q-1, x0=L, x1=L+p-1, mid=(x0+x1)/2;
+  const postCols=[...Array(p)].map((_,i)=>x0+i).sort((a,b)=>Math.abs(a-mid)-Math.abs(b-mid)||a-b);
+  const cells=[];
+  for(let r=H-1;r>armBot;r--) for(const c of postCols) cells.push([c,r]);              // 아래 기둥 (아래→위)
+  for(let r=armBot;r>=top;r--) for(const c of postCols) cells.push([c,r]);             // 교차점
+  for(let d=1;d<=L;d++) for(let r=armBot;r>=top;r--){ cells.push([x0-d,r]); cells.push([x1+d,r]); } // 양팔 (안→밖)
+  for(let r=top-1;r>=0;r--) for(const c of postCols) cells.push([c,r]);                // 위쪽
+  return layoutCache[n]={p,q,L,H,W,top,armBot,x0,x1,cells,n:cells.length};
+}
+let prevRead=null, prevRange=null, prevComplete=false;
+
+/* ---------- 평면 대체 화면 (3D를 못 쓰는 브라우저) ---------- */
+const S2=10, C2=8.4;
+function crossSVG(lay){
+  const M=12, P=3, w=lay.W*S2-(S2-C2), h=lay.H*S2-(S2-C2);
+  const X0=lay.x0*S2-P, X1=(lay.x1+1)*S2-(S2-C2)+P, AT=lay.top*S2-P, AB=(lay.armBot+1)*S2-(S2-C2)+P;
+  const outline=`M${X0} ${-P}H${X1}V${AT}H${w+P}V${AB}H${X1}V${h+P}H${X0}V${AB}H${-P}V${AT}H${X0}Z`;
+  let base="", fill="";
+  lay.cells.forEach(([c,r])=>{
+    base+=`<rect class="base" x="${c*S2}" y="${r*S2}" width="${C2}" height="${C2}" rx="1.4"/>`;
+    fill+=`<rect class="fill" x="${c*S2}" y="${r*S2}" width="${C2}" height="${C2}" rx="1.4" opacity="0"/>`;
+  });
+  return `<svg class="cross" id="cross" viewBox="${-M} ${-M} ${w+2*M} ${h+2*M}" role="img" aria-label="십자가"
+    style="aspect-ratio:${w+2*M}/${h+2*M};height:min(46dvh,400px,calc(70vw * ${(h+2*M)/(w+2*M)}))">
+    <defs>
+      <linearGradient id="goldGrad" gradientUnits="userSpaceOnUse" x1="0" y1="${h}" x2="0" y2="0">
+        <stop offset="0" stop-color="#A97C25"/><stop offset=".55" stop-color="#CFA449"/><stop offset="1" stop-color="#E8C877"/>
+      </linearGradient>
+      <filter id="soft" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="2.5"/></filter>
+    </defs>
+    <path class="outline" d="${outline}"/>
+    <g>${base}</g><g>${fill}</g><g id="sparks"></g>
+  </svg>`;
+}
+function spark2(c,r,delay){
+  const s=document.createElementNS("http://www.w3.org/2000/svg","rect");
+  s.setAttribute("class","spark"); s.setAttribute("x",c*S2); s.setAttribute("y",r*S2);
+  s.setAttribute("width",C2); s.setAttribute("height",C2); s.setAttribute("rx","2");
+  s.style.animationDelay=`${delay}ms`;
+  s.addEventListener("animationend",()=>s.remove());
+  $("#sparks").appendChild(s);
+}
+function paintSVG(lay, read, from){
+  const fills=$("#cross").querySelectorAll(".fill");
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(from==null){ fills.forEach((f,i)=>{ f.style.transition="none"; f.setAttribute("opacity",i<read?1:0); }); return; }
+  fills.forEach((f,i)=>{ f.style.transition="none"; f.setAttribute("opacity",i<from?1:0); });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    let k=0;
+    fills.forEach((f,i)=>{
+      const on=i<read, grew=on&&i>=from;
+      f.style.transition=""; f.style.transitionDelay=grew?`${Math.min(k*20,1500)}ms`:"0ms";
+      f.setAttribute("opacity",on?1:0);
+      if(grew){ if(!reduce&&k<200) spark2(...lay.cells[i],Math.min(k*20,1500)); k++; }
+    });
+  }));
+}
+
+/* ===================== 3D 십자가 (Three.js) ===================== */
+const C3 = (()=>{
+  const api={ok:false};
+  let renderer, scene, camera, root, inst=null, outline=null, host=null, raf=0, lay=null, D=1;
+  let GRAY, GOLD, GOLD_DONE, GLOW, cur=new Float32Array(0), pos=[], anims=[], glows=[], sprites=[];
+  let jit=new Float32Array(0), complete=false, recolorAll=true, lastActive=new Set();
+  let userY=0, userX=0, drag=null, lastTouch=0;
+  let focus=null, d0=40, frontier=-1, marker=null, hostRO=null;
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let tmpM, tmpQ, tmpV, tmpS, tmpC;
+
+  function init(){
+    if(!window.THREE) return;
+    try{
+      const t=document.createElement("canvas");
+      if(!(t.getContext("webgl")||t.getContext("experimental-webgl"))) return;
+      renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+    }catch(e){ return; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.outputEncoding=THREE.sRGBEncoding;
+    renderer.setClearColor(0x000000,0);
+    scene=new THREE.Scene();
+    camera=new THREE.PerspectiveCamera(26,.7,1,600);
+    scene.add(new THREE.HemisphereLight(0xfff4dc,0xa89a7c,.62));
+    const key=new THREE.DirectionalLight(0xffffff,.85); key.position.set(30,50,60); scene.add(key);
+    const rim=new THREE.DirectionalLight(0xffd391,.7); rim.position.set(-45,20,-40); scene.add(rim);
+    const fill=new THREE.DirectionalLight(0xfff0d2,.35); fill.position.set(-30,-30,45); scene.add(fill);
+    GRAY=new THREE.Color("#BDB9B0").convertSRGBToLinear();
+    GOLD=new THREE.Color("#C2943F").convertSRGBToLinear();
+    GOLD_DONE=new THREE.Color("#D8A84A").convertSRGBToLinear();
+    GLOW=new THREE.Color("#FFF1C4").convertSRGBToLinear().multiplyScalar(1.6);
+    tmpM=new THREE.Matrix4(); tmpQ=new THREE.Quaternion(); tmpV=new THREE.Vector3(); tmpS=new THREE.Vector3(); tmpC=new THREE.Color();
+    root=new THREE.Group(); scene.add(root);
+
+    const gc=document.createElement("canvas"); gc.width=gc.height=64;
+    const gx=gc.getContext("2d"), grd=gx.createRadialGradient(32,32,0,32,32,32);
+    grd.addColorStop(0,"rgba(255,236,180,1)"); grd.addColorStop(.35,"rgba(240,196,110,.5)"); grd.addColorStop(1,"rgba(240,196,110,0)");
+    gx.fillStyle=grd; gx.fillRect(0,0,64,64);
+    const tex=new THREE.CanvasTexture(gc);
+    for(let i=0;i<180;i++){
+      const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+      s.visible=false; root.add(s); sprites.push(s);
+    }
+    marker=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+    marker.visible=false; root.add(marker);
+
+    const cv=renderer.domElement;
+    cv.addEventListener("pointerdown",e=>{ drag={x:e.clientX,y:e.clientY,uy:userY,ux:userX}; try{cv.setPointerCapture(e.pointerId);}catch(_){} });
+    cv.addEventListener("pointermove",e=>{ if(!drag) return;
+      userY=drag.uy+(e.clientX-drag.x)*.012;
+      userX=Math.max(-.5,Math.min(.5,drag.ux+(e.clientY-drag.y)*.006)); });
+    const end=()=>{ drag=null; lastTouch=performance.now(); };
+    cv.addEventListener("pointerup",end); cv.addEventListener("pointercancel",end);
+    new ResizeObserver(()=>resize()).observe(document.documentElement);
+    cv.addEventListener("webglcontextlost",e=>{ e.preventDefault(); fail(); });
+    api.ok=true;
+  }
+
+  function build(l){
+    if(lay===l) return;
+    lay=l;
+    if(inst){ root.remove(inst); inst.geometry.dispose(); inst.material.dispose(); }
+    if(outline){ root.remove(outline); outline.geometry.dispose(); outline.material.dispose(); }
+    D=Math.max(1,l.p*.75);
+    const geo=new THREE.BoxGeometry(.84,.84,D);
+    const mat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.55,metalness:.3});
+    inst=new THREE.InstancedMesh(geo,mat,l.n);
+    pos=l.cells.map(([c,r])=>[c-(l.W-1)/2,(l.H-1)/2-r]);
+    cur=new Float32Array(l.n); jit=Float32Array.from({length:l.n},(_,i)=>.9+.16*((Math.sin(i*12.9898)*43758.5453)%1+1)%1); anims=[]; glows=[]; lastActive=new Set();
+    for(let i=0;i<l.n;i++){
+      tmpM.makeTranslation(pos[i][0],pos[i][1],0); inst.setMatrixAt(i,tmpM);
+      inst.setColorAt(i,GRAY);
+    }
+    inst.instanceMatrix.needsUpdate=true; inst.instanceColor.needsUpdate=true;
+    root.add(inst);
+
+    const pad=.25, hw=l.W/2, hh=l.H/2;
+    const xl=l.x0-(l.W-1)/2-.5-pad, xr=l.x1-(l.W-1)/2+.5+pad;
+    const yt=hh+pad, yat=hh-l.top+pad, yab=hh-(l.armBot+1)-pad, yb=-hh-pad;
+    const sh=new THREE.Shape();
+    [[xl,yt],[xr,yt],[xr,yat],[hw+pad,yat],[hw+pad,yab],[xr,yab],[xr,yb],[xl,yb],[xl,yab],[-hw-pad,yab],[-hw-pad,yat],[xl,yat]]
+      .forEach(([x,y],i)=>i?sh.lineTo(x,y):sh.moveTo(x,y));
+    sh.closePath();
+    const ex=new THREE.ExtrudeGeometry(sh,{depth:D+2*pad,bevelEnabled:false}); ex.translate(0,0,-(D+2*pad)/2);
+    outline=new THREE.LineSegments(new THREE.EdgesGeometry(ex),new THREE.LineBasicMaterial({color:0xB88A2F,transparent:true,opacity:.55}));
+    ex.dispose(); root.add(outline);
+    recolorAll=true; resize();
+  }
+
+  function resize(){
+    if(!host||!host.isConnected||!lay) return;
+    const w=host.clientWidth, h=host.clientHeight; if(!w||!h) return;
+    renderer.setSize(w,h,false);
+    camera.aspect=w/h;
+    const tv=Math.tan(THREE.MathUtils.degToRad(camera.fov/2));
+    const d=Math.max((lay.H/2+1.5)/tv,(lay.W/2+1.5)/(tv*camera.aspect))+D/2;
+    d0=d; camera.position.set(0,0,d); camera.near=d/20; camera.far=d*4; camera.lookAt(0,0,0);
+    camera.updateProjectionMatrix();
+  }
+
+  function paintCell(i,g){
+    const v=cur[i];
+    tmpC.copy(GRAY).lerp(complete?GOLD_DONE:GOLD,v);
+    tmpC.multiplyScalar(1+(jit[i]-1)*v);
+    if(g>0) tmpC.lerp(GLOW,g*.75);
+    inst.setColorAt(i,tmpC);
+    const sc=1+g*.16;
+    tmpV.set(pos[i][0],pos[i][1],g*.4); tmpS.set(sc,sc,1);
+    tmpM.compose(tmpV,tmpQ,tmpS); inst.setMatrixAt(i,tmpM);
+  }
+
+  let frames=0;
+  function fail(){
+    if(!api.ok) return;
+    api.ok=false; if(raf) cancelAnimationFrame(raf); raf=0;
+    try{ renderer.domElement.remove(); }catch(_){}
+    if(api.onFail) api.onFail();
+  }
+  // 첫 화면이 실제로 그려졌는지 확인: 십자가 기둥이 있어야 할 자리에 픽셀이 없으면 평면 십자가로 바꾼다
+  function drewSomething(){
+    const gl=renderer.getContext(), w=gl.drawingBufferWidth, h=gl.drawingBufferHeight;
+    if(!w||!h) return true;
+    for(const fy of [.25,.5,.7]){
+      const x0=Math.floor(w*.38), n=Math.max(1,Math.floor(w*.24)), buf=new Uint8Array(n*4);
+      gl.readPixels(x0,Math.floor(h*fy),n,1,gl.RGBA,gl.UNSIGNED_BYTE,buf);
+      for(let i=3;i<buf.length;i+=4) if(buf[i]>0) return true;
+    }
+    return false;
+  }
+  function frame(t){
+    if(!host||!host.isConnected||view!=="home"){ raf=0; return; }
+    try{
+      frameInner(t);
+      frames++;
+      if(frames===4 && !drewSomething()){ fail(); return; }
+    }catch(e){ fail(); return; }
+    raf=requestAnimationFrame(frame);
+  }
+  function frameInner(t){
+    const active=new Map();
+    anims=anims.filter(a=>{
+      const k=Math.max(0,Math.min(1,(t-a.start)/a.dur));
+      const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+      cur[a.i]=a.from+(a.to-a.from)*e;
+      if(!active.has(a.i)) active.set(a.i,0);
+      return k<1;
+    });
+    glows=glows.filter(o=>{
+      const k=(t-o.start)/o.dur;
+      if(k<0) return true;
+      if(k>1){ if(!active.has(o.i)) active.set(o.i,0); return false; }
+      const v=k<.25?k/.25:1-(k-.25)/.75, g=v*v*(3-2*v);
+      active.set(o.i,Math.max(active.get(o.i)||0,g));
+      return true;
+    });
+    let touched=false;
+    if(recolorAll){
+      for(let i=0;i<lay.n;i++) paintCell(i,active.get(i)||0);
+      recolorAll=false; touched=true;
+    } else {
+      for(const i of lastActive) if(!active.has(i)) { paintCell(i,0); touched=true; }
+      for(const [i,g] of active){ paintCell(i,g); touched=true; }
+    }
+    if(touched){ inst.instanceColor.needsUpdate=true; inst.instanceMatrix.needsUpdate=true; }
+    lastActive=new Set(active.keys());
+    // 빛 번짐
+    let s=0;
+    for(const [i,g] of active){
+      if(g<.03) continue; if(s>=sprites.length) break;
+      const sp=sprites[s++]; sp.visible=true; sp.material.opacity=g*.45;
+      sp.position.set(pos[i][0],pos[i][1],D/2+.6); sp.scale.setScalar(1.2+g*1.6);
+    }
+    for(;s<sprites.length;s++) sprites[s].visible=false;
+
+    if(!drag && t-lastTouch>2500){ userY=Math.atan2(Math.sin(userY),Math.cos(userY))*.965; userX*=.95; }
+    // 새로 채워진 곳으로 잠시 다가갔다가 돌아오기
+    let e=0;
+    if(focus){
+      const k=t-focus.start;
+      if(k>3600) focus=null;
+      else if(k>0){ const ease=x=>x*x*(3-2*x);
+        e = k<700 ? ease(k/700) : k<2500 ? 1 : ease(1-(k-2500)/1100); }
+    }
+    const dz=d0*(1-.45*e), tv=Math.tan(THREE.MathUtils.degToRad(camera.fov/2));
+    const hv=Math.max(0,lay.H/2+1.5-dz*tv*.9), hx=Math.max(0,lay.W/2+1.5-dz*tv*camera.aspect*.9);
+    const fx=focus?Math.max(-hx,Math.min(hx,focus.x))*e:0, fy=focus?Math.max(-hv,Math.min(hv,focus.y))*e:0;
+    camera.position.set(fx,fy,dz); camera.lookAt(fx,fy,0);
+    // 지금까지 읽은 마지막 블록에 은은한 표시
+    if(marker){
+      const on=frontier>=0 && !complete && lay && frontier<lay.n;
+      marker.visible=on;
+      if(on){ const w=reduce?.5:.35+.25*Math.sin(t*.003);
+        marker.position.set(pos[frontier][0],pos[frontier][1],D/2+.6);
+        marker.material.opacity=w; marker.scale.setScalar(2.6); }
+    }
+    root.rotation.y=((reduce?0:Math.sin(t*.00042)*.42)+userY)*(1-.85*e);
+    root.rotation.x=(-.07+userX+(reduce?0:Math.sin(t*.0003)*.035))*(1-.85*e);
+    renderer.render(scene,camera);
+  }
+
+  api.mount=(el,l)=>{
+    host=el; frames=0; build(l); el.appendChild(renderer.domElement); resize();
+    if(hostRO) hostRO.disconnect();
+    hostRO=new ResizeObserver(()=>resize()); hostRO.observe(el);
+    if(!raf) raf=requestAnimationFrame(frame);
+  };
+  api.setValues=(read,animate)=>{
+    const now=performance.now(); anims=[]; let k=0, gx=0, gy=0, gn=0;
+    frontier=read-1;
+    for(let i=0;i<lay.n;i++){
+      const v=i<read?1:0;
+      if(!animate){ cur[i]=v; continue; }
+      if(cur[i]===v) continue;
+      const grew=v>cur[i], delay=grew?Math.min(k*20,1500):Math.min(k*6,600);
+      anims.push({i,from:cur[i],to:v,start:now+delay,dur:grew?800:600});
+      if(grew && !reduce) glows.push({i,start:now+delay,dur:1500});
+      if(grew){ gx+=pos[i][0]; gy+=pos[i][1]; gn++; }
+      k++;
+    }
+    if(gn && !reduce && gn<lay.n*.5) focus={start:now+200,x:gx/gn,y:gy/gn};
+    if(!animate) recolorAll=true;
+  };
+  api.setComplete=b=>{ if(complete!==b){ complete=b; recolorAll=true; } };
+  api.celebrate=()=>{
+    if(reduce||!lay) return; const now=performance.now(), step=2200/lay.n;
+    for(let i=0;i<lay.n;i++) glows.push({i,start:now+700+i*step,dur:1400});
+  };
+  init();
+  return api;
+})();
+
+const PREF3D="malsseum-cross:3d";
+let pref3d=true; try{ pref3d=localStorage.getItem(PREF3D)!=="0"; }catch(_){}
+C3.onFail=()=>{ if(view==="home") render(); };
+
+/* ===================== 화면 상태 ===================== */
+let view = "home";
+const ui = { open:null, tab:"ot", selected:new Set(), date:today(), confirmReset:false };
+
+function go(v, opts={}){
+  if(v!=="check") ui.selected.clear();
+  view=v; render(opts);
+  $("#main").scrollTop = 0;
+  if(opts.scrollTo){
+    const el=document.getElementById("book-"+opts.scrollTo);
+    if(el) el.scrollIntoView({block:"start"});
+  }
+}
+
+function render(){
+  document.querySelectorAll("nav button").forEach(b=>{
+    if(b.dataset.go===view) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
+  });
+  const main=$("#main");
+  if(view==="home") renderHome(main);
+  else if(view==="check") renderCheck(main);
+  else renderRecords(main);
+  renderActionBar();
+}
+
+/* ---------- 홈 ---------- */
+function renderHome(main){
+  const st = rangeStats(), r = RANGE[state.rangeId], lay = crossLayout(st.total);
+  const use3d = C3.ok && pref3d;
+  const ar = (lay.W+3)/(lay.H+3);
+  main.innerHTML = `
+  <section class="screen home">
+    <div class="brand"><h1>말씀 십자가</h1><p>${r.name} 통독 · 블록 ${num(lay.n)}개</p></div>
+    <div class="cross-wrap ${st.completedAt?"complete":""}" id="crossWrap"><div class="halo"></div>${use3d
+      ? `<div class="cross3d" id="cross3d" role="img" aria-label="입체 십자가, 블록 ${num(lay.n)}개 중 ${num(st.read)}개 채워짐"
+           style="aspect-ratio:${ar};height:min(48dvh,440px,calc(84vw / ${ar}))"></div>`
+      : crossSVG(lay)}</div>
+    <div class="view-row">${use3d?`<span class="hint">옆으로 밀어 돌려 보세요</span>`:""}${C3.ok?`<button type="button" class="chip" id="toggle3d">${use3d?"평면으로 보기":"입체로 보기"}</button>`:""}</div>
+    <div class="stats">
+      <div class="pct">${pctText(st.p)}<small>%</small></div>
+      <div class="count"><b>${num(st.read)}</b> / ${num(st.total)}장 읽음</div>
+      ${st.completedAt
+        ? `<div class="done-note">십자가가 완성되었습니다 · ${fmtFull(st.completedAt)} 완독</div>`
+        : `<div class="today-note">${st.todayN?`오늘 ${st.todayN}장을 읽었어요`:"오늘의 말씀을 기다리고 있어요"}</div>`}
+    </div>
+    <button type="button" class="btn btn-primary btn-wide" id="recordToday">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      오늘 읽은 말씀 기록하기
+    </button>
+  </section>`;
+
+  // 같은 범위에서 다시 그릴 때만 바뀐 블록에 애니메이션과 빛 효과를 준다
+  const same = prevRead!=null && prevRange===state.rangeId;
+  if(use3d){
+    C3.mount($("#cross3d"), lay);
+    C3.setComplete(!!st.completedAt);
+    C3.setValues(st.read, same);
+  } else paintSVG(lay, st.read, same ? prevRead : null);
+  prevRead=st.read; prevRange=state.rangeId;
+
+  if(st.completedAt && !prevComplete) celebrate(lay);
+  prevComplete = !!st.completedAt;
+
+  const tg=$("#toggle3d"); if(tg) tg.onclick=()=>{ pref3d=!pref3d; try{localStorage.setItem(PREF3D,pref3d?"1":"0");}catch(_){} render(); };
+  $("#recordToday").onclick = ()=>{
+    const rr = RANGE[state.rangeId];
+    const next = rr.books.find(id=>bookRead(id)<BOOK[id].ch) || rr.books[0];
+    ui.open = next; ui.tab = BOOK[next].t;
+    go("check",{scrollTo:next});
+  };
+}
+function celebrate(lay){
+  if(C3.ok && pref3d){ C3.celebrate(); return; }
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const step=Math.max(1,Math.floor(lay.n/240));
+  for(let i=0;i<lay.n;i+=step) spark2(...lay.cells[i],600+i*(2000/lay.n));
+}
+
+/* ---------- 읽기 체크 ---------- */
+function renderCheck(main){
+  const st = rangeStats(), r = RANGE[state.rangeId];
+  const hasOT = r.books.some(id=>BOOK[id].t==="ot"), hasNT = r.books.some(id=>BOOK[id].t==="nt");
+  if(!(hasOT&&hasNT)) ui.tab = hasOT ? "ot" : "nt";
+  const list = r.books.filter(id=>BOOK[id].t===ui.tab);
+  main.innerHTML = `
+  <section class="screen">
+    <div class="head"><h2>읽기 체크</h2><p>${r.name} · ${num(st.read)} / ${num(st.total)}장 · ${pctText(st.p)}%</p></div>
+    ${hasOT&&hasNT?`<div class="seg" role="group" aria-label="구약 신약">
+      <button type="button" data-tab="ot" aria-pressed="${ui.tab==="ot"}">구약</button>
+      <button type="button" data-tab="nt" aria-pressed="${ui.tab==="nt"}">신약</button></div>`:""}
+    <div class="legend"><span><i></i>안 읽음</span><span><i class="r"></i>읽음</span><span><i class="s"></i>선택</span></div>
+    <div class="books">${list.map(bookHTML).join("")}</div>
+  </section>`;
+  main.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{ ui.tab=b.dataset.tab; render(); $("#main").scrollTop=0; });
+}
+function bookHTML(id){
+  const b=BOOK[id], n=bookRead(id), open=ui.open===id;
+  let grid="";
+  if(open){
+    for(let c=1;c<=b.ch;c++){
+      const k=key(id,c), read=!!state.reads[k], sel=ui.selected.has(k);
+      grid+=`<button type="button" class="ch${read?" read":""}${sel?" sel":""}" data-k="${k}" aria-pressed="${sel}" aria-label="${b.name} ${c}장${read?" 읽음":""}">${c}</button>`;
+    }
+  }
+  return `<div class="book${n===b.ch?" full":""}" id="book-${id}">
+    <button type="button" class="book-head" data-book="${id}" aria-expanded="${open}">
+      <span class="book-name"><span>${b.name}</span><span class="bar"><i style="width:${n/b.ch*100}%"></i></span></span>
+      <span class="book-count">${n} / ${b.ch}</span>
+      <svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg>
+    </button>
+    ${open?`<div class="panel">
+      <div class="panel-tools">
+        <button type="button" class="chip" data-selall="${id}">안 읽은 장 모두 선택</button>
+        <button type="button" class="chip" data-selread="${id}">읽은 장 모두 선택</button>
+        <button type="button" class="chip" data-selnone="${id}">이 책 선택 해제</button>
+      </div>
+      <div class="grid">${grid}</div></div>`:""}
+  </div>`;
+}
+$("#main").addEventListener("click",e=>{
+  if(view!=="check") return;
+  const ch=e.target.closest(".ch");
+  if(ch){
+    const k=ch.dataset.k;
+    if(ui.selected.has(k)) ui.selected.delete(k); else ui.selected.add(k);
+    ch.classList.toggle("sel"); ch.setAttribute("aria-pressed", ui.selected.has(k));
+    renderActionBar(); return;
+  }
+  const head=e.target.closest("[data-book]");
+  if(head){ const id=head.dataset.book; ui.open = ui.open===id?null:id; rerenderCheckKeepScroll(); return; }
+  const t=e.target.closest("[data-selall],[data-selread],[data-selnone]");
+  if(t){
+    const id=t.dataset.selall||t.dataset.selread||t.dataset.selnone;
+    for(let c=1;c<=BOOK[id].ch;c++){
+      const k=key(id,c), read=!!state.reads[k];
+      if(t.dataset.selnone) ui.selected.delete(k);
+      else if(t.dataset.selall && !read) ui.selected.add(k);
+      else if(t.dataset.selread && read) ui.selected.add(k);
+    }
+    rerenderCheckKeepScroll();
+  }
+});
+function rerenderCheckKeepScroll(){ const m=$("#main"), y=m.scrollTop; render(); m.scrollTop=y; }
+
+/* ---------- 선택 액션 바 ---------- */
+function renderActionBar(){
+  const bar=$("#actionbar");
+  if(view!=="check" || ui.selected.size===0){ bar.hidden=true; bar.innerHTML=""; return; }
+  const add=[...ui.selected].filter(k=>!state.reads[k]);
+  const rem=[...ui.selected].filter(k=>state.reads[k]);
+  const t=today();
+  if(ui.date>t) ui.date=t;
+  bar.hidden=false;
+  bar.innerHTML=`
+    <div class="ab-row">
+      <div class="ab-sum"><b>${ui.selected.size}장</b> 선택됨 <button type="button" class="ab-clear" id="abClear">선택 해제</button></div>
+      ${add.length?`<label class="ab-date" for="readDate">읽은 날 <input type="date" id="readDate" value="${ui.date}" max="${t}"></label>`:""}
+    </div>
+    <div class="ab-btns">
+      ${add.length?`<button type="button" class="btn btn-primary" id="abAdd">${add.length}장 기록하기</button>`:""}
+      ${rem.length?`<button type="button" class="btn btn-danger" id="abRem">${rem.length}장 체크 취소</button>`:""}
+    </div>`;
+  $("#abClear").onclick=()=>{ ui.selected.clear(); rerenderCheckKeepScroll(); };
+  const di=$("#readDate"); if(di) di.onchange=()=>{ if(DATE_RE.test(di.value)) ui.date = di.value>t?t:di.value; };
+  const a=$("#abAdd"); if(a) a.onclick=()=>commitAdd(add);
+  const r=$("#abRem"); if(r) r.onclick=()=>commitRemove(rem);
+}
+function commitAdd(keys){
+  const d = DATE_RE.test(ui.date) ? ui.date : today();
+  const added=[];
+  for(const k of keys){ if(!state.reads[k]){ state.reads[k]=d; added.push(k); } } // 이미 읽은 장은 다시 세지 않음
+  if(!added.length) return;
+  if(!state.startDate || d<state.startDate) state.startDate = d;
+  save();
+  ui.selected.clear();
+  const desc=describe(added);
+  toast(`${desc.length>2?desc.slice(0,2).join(", ")+" 외":desc.join(", ")} 기록했어요`);
+  go("home");
+}
+function commitRemove(keys){
+  for(const k of keys) delete state.reads[k];
+  save();
+  const desc=describe(keys);
+  ui.selected.clear();
+  toast(`${desc.length>2?desc.slice(0,2).join(", ")+" 외":desc.join(", ")} 체크를 취소했어요`);
+  rerenderCheckKeepScroll();
+}
+
+/* ---------- 나의 기록 ---------- */
+function renderRecords(main){
+  const st=rangeStats(), r=RANGE[state.rangeId];
+  const byDate={};
+  for(const [k,d] of Object.entries(state.reads)) (byDate[d]=byDate[d]||[]).push(k);
+  const dates=Object.keys(byDate).sort().reverse();
+  const nowY=new Date().getFullYear();
+  const days=dates.map(d=>{
+    const p=parts(d);
+    return `<div class="day">
+      <div class="day-date"><b>${p.m}.${pad(p.d)}</b><span>${p.y!==nowY?p.y+" · ":""}${p.w}요일</span></div>
+      <div class="day-body"><span class="n">${byDate[d].length}장</span>${describe(byDate[d]).map(s=>`<p>${s}</p>`).join("")}</div>
+    </div>`;
+  }).join("");
+  main.innerHTML=`
+  <section class="screen">
+    <div class="head"><h2>나의 기록</h2><p>읽은 날짜별로 모아 보여드려요</p></div>
+    <div class="summary">
+      <div class="sum-row" style="flex-direction:column;align-items:stretch;gap:8px">
+        <span class="label">통독 범위</span>
+        <div class="ranges" role="group" aria-label="통독 범위">${RANGES.map(x=>`<button type="button" data-range="${x.id}" aria-pressed="${x.id===state.rangeId}">${x.name}</button>`).join("")}</div>
+      </div>
+      <div class="sum-row">
+        <label class="label" for="startDate">통독 시작일</label>
+        ${state.startDate||dates.length
+          ? `<input type="date" id="startDate" value="${state.startDate||dates[dates.length-1]}" max="${today()}">`
+          : `<span class="sum-val" style="color:var(--muted);font-weight:400">첫 기록과 함께 시작돼요</span>`}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="sum-row"><span class="label">전체 진행률</span><span class="sum-val">${pctText(st.p)}% · ${num(st.read)} / ${num(st.total)}장</span></div>
+        <div class="bigbar"><i style="width:${st.p*100}%"></i></div>
+        ${st.completedAt?`<div class="complete-line">${fmtFull(st.completedAt)}에 ${r.name} 통독을 마쳤습니다</div>`:""}
+      </div>
+    </div>
+    <h3 class="sec-title">날짜별 읽은 범위</h3>
+    <div class="days">${days || `<div class="empty">아직 기록이 없어요.<br>읽기 체크에서 읽은 장을 선택해 기록하면 여기에 날짜별로 모입니다.</div>`}</div>
+    ${dates.length?`<div class="reset" id="resetBox">${ui.confirmReset
+      ?`<span>모든 읽기 기록을 지울까요? 되돌릴 수 없어요.</span><div class="row"><button type="button" class="btn btn-danger" id="resetYes" style="padding:8px 16px">모두 지우기</button><button type="button" class="btn btn-ghost" id="resetNo" style="padding:8px 16px">그대로 두기</button></div>`
+      :`<button type="button" class="linkbtn" id="resetAsk">기록 전체 초기화</button>`}</div>`:""}
+  </section>`;
+  main.querySelectorAll("[data-range]").forEach(b=>b.onclick=()=>{
+    state.rangeId=b.dataset.range; save(); prevComplete = !!rangeStats().completedAt;
+    ui.open=null; rerenderRecords();
+    toast(`통독 범위를 ${RANGE[state.rangeId].name}(으)로 바꿨어요`);
+  });
+  const sd=$("#startDate"); if(sd) sd.onchange=()=>{ if(DATE_RE.test(sd.value)){ state.startDate=sd.value; save(); toast("통독 시작일을 바꿨어요"); } };
+  const ask=$("#resetAsk"); if(ask) ask.onclick=()=>{ ui.confirmReset=true; rerenderRecords(); };
+  const no=$("#resetNo"); if(no) no.onclick=()=>{ ui.confirmReset=false; rerenderRecords(); };
+  const yes=$("#resetYes"); if(yes) yes.onclick=()=>{
+    state={rangeId:state.rangeId,startDate:null,reads:{}}; save(); ui.confirmReset=false;
+    prevComplete=false; rerenderRecords(); toast("모든 기록을 지웠어요");
+  };
+}
+function rerenderRecords(){ const m=$("#main"), y=m.scrollTop; render(); m.scrollTop=y; }
+
+/* ---------- 토스트 ---------- */
+let toastTimer;
+function toast(msg){
+  const t=$("#toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2600);
+}
+
+/* ---------- 시작 ---------- */
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{ ui.confirmReset=false; go(b.dataset.go); });
+const h=(location.hash||"").slice(1);
+if(h==="check"||h==="records") view=h;
+prevComplete = !!rangeStats().completedAt;
+render();
+</script>
+
+</body>
+</html>
